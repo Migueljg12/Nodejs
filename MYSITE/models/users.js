@@ -5,7 +5,13 @@ import { hash, verify } from '../helpers/crypto.js'
 
 const UserSchema = new Schema({
     name: { type: String, required: true },
-    email: { type: String, required: true },
+    email: {
+        type: String,
+        required: true,
+        index: true,
+        unique: true,
+        sparse: true,
+    },
     cpf: {
         type: String,
         required: true,
@@ -33,8 +39,8 @@ const UserSchema = new Schema({
     },
 })
 
-UserSchema.pre('save', function (next) {
-    this.password = hash(this.password)
+UserSchema.pre('save', async function (next) {
+    this.password = await hash(this.password)
 
     next()
 })

@@ -1,16 +1,21 @@
 import { UserRepository } from '../models/index.js'
+import { generateToken } from '../helpers/token.js'
 
 export default class UserService {
     constructor() { }
 
     static async create(obj) {
-        try {
-            const user = UserRepository(obj)
-            await user.save()
-            return user
-        } catch (error) {
-            console.log('oi', error)
-        }
+        let user = UserRepository(obj)
+        await user.save()
+        return user
+    }
+
+    static async upsert(query, update) {
+        return UserRepository.findOneAndUpdate(query, update, {
+            upsert: true,
+            new: true,
+        })
+
     }
 
     static async getById(id) {
@@ -28,8 +33,6 @@ export default class UserService {
         }
         query = query.find(rest)
 
-        query = query.find({ active: true })
-
         return query
     }
 
@@ -46,8 +49,23 @@ export default class UserService {
     }
 
     static async signin({ email, password }) {
-        let user = UserRepository.verifyUser(email, password)
+        let user = await UserRepository.verifyUser(email, password)
 
-        return user
+        if (user) {
+            return generateToken(user)
+        } else {
+            throw new Error('Email ou senha inválidos')
+        }
     }
+
+    static async verifyIfUserExist(cpf) {
+        let user = await UserRepository.findOne({ cpf, active: true })
+
+        return user ? true : false
+    }
+    // static async verifyIfUserExist(query) {
+    //     let user = await UserRepository.findOne({ query })
+
+    //     return user ? true : false
+    // }
 }

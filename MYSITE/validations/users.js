@@ -1,4 +1,5 @@
 import { body } from 'express-validator'
+import UserService from '../services/users.js'
 
 const validationCreateUser = [
     body('name')
@@ -15,7 +16,17 @@ const validationCreateUser = [
         .isString()
         .withMessage('CPF precisa ser uma string')
         .notEmpty()
-        .withMessage('CPF é Obrigatório'),
+        .withMessage('CPF é Obrigatório')
+        .customSanitizer((value) => {
+            return value.replaceAll('.', '').replaceAll('-', '')
+        })
+        .custom(async (value) => {
+            let existCpf = await UserService.verifyIfUserExist(value)
+
+            if (existCpf) {
+                throw new Error('Esse CPF já está cadastrado')
+            }
+        }),
     body('password')
         .isString()
         .withMessage('Senha precisa ser uma string')
