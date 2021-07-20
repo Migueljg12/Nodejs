@@ -1,13 +1,16 @@
 import express from 'express'
 import UserService from '../services/users.js'
 
+let service = new UserService()
+
 const router = express.Router()
 
+const prefix = 'auth'
 
 router.post('/signin', async (req, res) => {
     let { body } = req
     try {
-        let token = await UserService.signin(body)
+        let token = await service.signin(body)
 
         res.status(201).json({ token: token })
     }
@@ -16,4 +19,7 @@ router.post('/signin', async (req, res) => {
     }
 })
 
-export default router
+export default {
+    controller: router,
+    prefix,
+}

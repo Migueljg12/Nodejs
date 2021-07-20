@@ -37,6 +37,10 @@ const UserSchema = new Schema({
         type: Boolean,
         default: true,
     },
+    posts: [{
+        type: Schema.Types.ObjectId,
+        ref: 'posts'
+    }]
 })
 
 UserSchema.pre('save', async function (next) {

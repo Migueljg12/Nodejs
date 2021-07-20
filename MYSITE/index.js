@@ -10,7 +10,8 @@ app.use(express.json())
 
 connectMongoose()
 
-controllers.forEach((controller) => app.use('/', controller))
+controllers.forEach(({ controller, prefix }) =>
+    app.use(`/api/${prefix}`, controller))
 
 const server = app.listen(PORT, () =>
     console.log(`API funcionando na porta ${PORT}`))

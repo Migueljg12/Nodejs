@@ -2,12 +2,13 @@ import jwt from 'jsonwebtoken'
 
 const { SECRET } = process.env
 
-function generateToken({ _id, name, email }) {
+function generateToken({ _id, name, email, cpf }) {
     let jwtToken = jwt.sign(
         {
             _id,
             name,
-            email
+            email,
+            cpf
         },
         SECRET,
         {

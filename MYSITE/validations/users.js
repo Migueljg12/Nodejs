@@ -1,6 +1,8 @@
 import { body } from 'express-validator'
 import UserService from '../services/users.js'
 
+let userService = new UserService()
+
 const validationCreateUser = [
     body('name')
         .isString()
@@ -21,7 +23,7 @@ const validationCreateUser = [
             return value.replaceAll('.', '').replaceAll('-', '')
         })
         .custom(async (value) => {
-            let existCpf = await UserService.verifyIfUserExist(value)
+            let existCpf = await userService.verifyIfUserExist(value)
 
             if (existCpf) {
                 throw new Error('Esse CPF já está cadastrado')

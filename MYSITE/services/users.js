@@ -1,30 +1,15 @@
 import { UserRepository } from '../models/index.js'
 import { generateToken } from '../helpers/token.js'
+import Service from './service.js'
 
-export default class UserService {
-    constructor() { }
-
-    static async create(obj) {
-        let user = UserRepository(obj)
-        await user.save()
-        return user
+export default class UserService extends Service {
+    constructor() {
+        super(UserRepository)
     }
 
-    static async upsert(query, update) {
-        return UserRepository.findOneAndUpdate(query, update, {
-            upsert: true,
-            new: true,
-        })
-
-    }
-
-    static async getById(id) {
-        return UserRepository.findById(id)
-    }
-
-    static async get(filter) {
+    async get(filter) {
         let { name, ...rest } = filter
-        let query = UserRepository
+        let query = this.repository.find().populate('posts')
 
         if (name) {
             query = query.find({
@@ -36,20 +21,14 @@ export default class UserService {
         return query
     }
 
-    static async put(filter, update) {
-        return UserRepository.findOneAndUpdate(filter, update, {
+    async put(filter, update) {
+        return this.repository.findOneAndUpdate(filter, update, {
             new: true,
         })
     }
 
-    static async delete(filter) {
-        return UserRepository.findOneAndUpdate(filter, {
-            $set: { active: false },
-        })
-    }
-
-    static async signin({ email, password }) {
-        let user = await UserRepository.verifyUser(email, password)
+    async signin({ email, password }) {
+        let user = await this.repository.verifyUser(email, password)
 
         if (user) {
             return generateToken(user)
@@ -58,14 +37,19 @@ export default class UserService {
         }
     }
 
-    static async verifyIfUserExist(cpf) {
-        let user = await UserRepository.findOne({ cpf, active: true })
+    async verifyIfUserExist(cpf) {
+        let user = await this.repository.findOne({ cpf, active: true })
 
         return user ? true : false
     }
-    // static async verifyIfUserExist(query) {
-    //     let user = await UserRepository.findOne({ query })
 
-    //     return user ? true : false
-    // }
+    async addPost(userId, postId) {
+        await this.repository.findOneAndUpdate(
+            {
+                _id: userId,
+            },
+            { $push: { posts: postId } }
+        )
+    }
+
 }
