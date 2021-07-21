@@ -18,7 +18,7 @@ export default class PostService extends Service {
 
         return model
     }
-    async get({ filter }) {
+    async get(filter) {
         return this.repository.find(filter).populate('user')
     }
 }
